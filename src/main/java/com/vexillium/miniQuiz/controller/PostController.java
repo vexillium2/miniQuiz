@@ -33,8 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 帖子接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ * @author <a href="https://github.com/vexillium2">vexillium</a>
+ * @from <a href="https://vexillium.icu"></a>
  */
 @RestController
 @RequestMapping("/post")
@@ -209,23 +209,6 @@ public class PostController {
     }
 
     // endregion
-
-    /**
-     * 分页搜索（从 ES 查询，封装类）
-     *
-     * @param postQueryRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/search/page/vo")
-    public BaseResponse<Page<PostVO>> searchPostVOByPage(@RequestBody PostQueryRequest postQueryRequest,
-            HttpServletRequest request) {
-        long size = postQueryRequest.getPageSize();
-        // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Post> postPage = postService.searchFromEs(postQueryRequest);
-        return ResultUtils.success(postService.getPostVOPage(postPage, request));
-    }
 
     /**
      * 编辑（用户）

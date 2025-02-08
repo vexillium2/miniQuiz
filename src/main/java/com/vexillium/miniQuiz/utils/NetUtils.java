@@ -6,8 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 网络工具类
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ * @author <a href="https://github.com/vexillium2">vexillium</a>
+ * @from <a href="https://vexillium.icu"></a>
  */
 public class NetUtils {
 

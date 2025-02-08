@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 /**
 * @author Jacob
 * @description 针对表【user_answer(用户答题记录)】的数据库操作Mapper
-* @createDate 2024-12-19 19:26:53
+* @createDate 2025-02-09 00:07:49
 * @Entity generator.domain.UserAnswer
 */
 public interface UserAnswerMapper extends BaseMapper<UserAnswer> {
