@@ -1,11 +1,11 @@
-package com.j2157.miniQuiz.service;
+package com.vexillium.miniQuiz.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.j2157.miniQuiz.model.dto.userAnswer.UserAnswerQueryRequest;
-import com.j2157.miniQuiz.model.entity.UserAnswer;
-import com.j2157.miniQuiz.model.vo.UserAnswerVO;
+import com.vexillium.miniQuiz.model.dto.userAnswer.UserAnswerQueryRequest;
+import com.vexillium.miniQuiz.model.entity.UserAnswer;
+import com.vexillium.miniQuiz.model.vo.UserAnswerVO;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -1,10 +1,13 @@
-package com.j2157.miniQuiz.model.dto.app;
+package com.vexillium.miniQuiz.model.dto.app;
 
-import com.j2157.miniQuiz.common.PageRequest;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.vexillium.miniQuiz.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,6 +26,51 @@ public class AppQueryRequest extends PageRequest implements Serializable {
     private Long id;
 
     /**
+     * 应用名
+     */
+    private String appName;
+
+    /**
+     * 应用描述
+     */
+    private String appDesc;
+
+    /**
+     * 应用图标
+     */
+    private String appIcon;
+
+    /**
+     * 应用类型（0-得分类，1-测评类）
+     */
+    private Integer appType;
+
+    /**
+     * 评分策略（0-自定义，1-AI）
+     */
+    private Integer scoringStrategy;
+
+    /**
+     * 审核状态：0-待审核, 1-通过, 2-拒绝
+     */
+    private Integer reviewStatus;
+
+    /**
+     * 审核信息
+     */
+    private String reviewMessage;
+
+    /**
+     * 审核人 id
+     */
+    private Long reviewerId;
+
+    /**
+     * 创建用户 id
+     */
+    private Long userId;
+
+    /**
      * id
      */
     private Long notId;
@@ -31,26 +79,6 @@ public class AppQueryRequest extends PageRequest implements Serializable {
      * 搜索词
      */
     private String searchText;
-
-    /**
-     * 标题
-     */
-    private String title;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
-
-    /**
-     * 创建用户 id
-     */
-    private Long userId;
 
     private static final long serialVersionUID = 1L;
 }

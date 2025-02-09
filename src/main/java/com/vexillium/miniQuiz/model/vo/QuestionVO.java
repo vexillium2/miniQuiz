@@ -1,13 +1,13 @@
-package com.j2157.miniQuiz.model.vo;
+package com.vexillium.miniQuiz.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.j2157.miniQuiz.model.entity.Question;
+import com.vexillium.miniQuiz.model.entity.Question;
+import com.vexillium.miniQuiz.model.dto.question.QuestionContentDTO;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 题目视图
@@ -24,14 +24,14 @@ public class QuestionVO implements Serializable {
     private Long id;
 
     /**
-     * 标题
+     * 题目内容（json格式）
      */
-    private String title;
+    private QuestionContentDTO questionContent;
 
     /**
-     * 内容
+     * 应用 id
      */
-    private String content;
+    private Long appId;
 
     /**
      * 创建用户 id
@@ -47,11 +47,6 @@ public class QuestionVO implements Serializable {
      * 更新时间
      */
     private Date updateTime;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tagList;
 
     /**
      * 创建用户信息
@@ -70,8 +65,8 @@ public class QuestionVO implements Serializable {
         }
         Question question = new Question();
         BeanUtils.copyProperties(questionVO, question);
-        List<String> tagList = questionVO.getTagList();
-        question.setTags(JSONUtil.toJsonStr(tagList));
+        QuestionContentDTO questionContentDTO = questionVO.getQuestionContent();
+        question.setQuestionContent(JSONUtil.toJsonStr(questionContentDTO));
         return question;
     }
 
@@ -87,7 +82,7 @@ public class QuestionVO implements Serializable {
         }
         QuestionVO questionVO = new QuestionVO();
         BeanUtils.copyProperties(question, questionVO);
-        questionVO.setTagList(JSONUtil.toList(question.getTags(), String.class));
+        questionVO.setQuestionContent(JSONUtil.toBean(question.getQuestionContent(), QuestionContentDTO.class));
         return questionVO;
     }
 }

@@ -1,4 +1,4 @@
-package com.j2157.miniQuiz.model.dto.userAnswer;
+package com.vexillium.miniQuiz.model.dto.userAnswer;
 
 import lombok.Data;
 
@@ -15,19 +15,14 @@ import java.util.List;
 public class UserAnswerAddRequest implements Serializable {
 
     /**
-     * 标题
+     * 应用 id
      */
-    private String title;
+    private Long appId;
 
     /**
-     * 内容
+     * 用户答案（JSON 数组）
      */
-    private String content;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
+    private List<String> choices;
 
     private static final long serialVersionUID = 1L;
 }

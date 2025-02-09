@@ -1,4 +1,4 @@
-package com.j2157.miniQuiz.generate;
+package com.vexillium.miniQuiz.generate;
 
 import cn.hutool.core.io.FileUtil;
 import freemarker.template.Configuration;
@@ -6,17 +6,17 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.FileWriter;
-import java.io.Writer;
 
 /**
  * 代码生成器
  *
- * @author <a href="https://github.com/lij2157">程序员鱼皮</a>
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
+ * @author <a href="https://github.com/vexillium2">vexillium</a>
+ * @from <a href="https://vexillium.icu"></a>
  */
 public class CodeGenerator {
 
@@ -29,7 +29,7 @@ public class CodeGenerator {
      */
     public static void main(String[] args) throws TemplateException, IOException {
         // 指定生成参数
-        String packageName = "com.j2157.miniQuiz";
+        String packageName = "com.vexillium.miniQuiz";
         String dataName = "用户答案";
         String dataKey = "userAnswer";
         String upperDataKey = "UserAnswer";

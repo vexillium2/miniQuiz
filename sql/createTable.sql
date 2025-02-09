@@ -1,136 +1,139 @@
 -- -- 创建库
 -- CREATE DATABASE IF NOT EXISTS miniQuiz;
 
+-- 创建库
+#create database if not exists miniQuiz;
+
 -- 切换库
-\c mini_quiz;
+use mini_quiz;
 
 -- 用户表
-CREATE TABLE IF NOT EXISTS "user"
+create table if not exists user
 (
-    id              BIGINT PRIMARY KEY,
-    userAccount     VARCHAR(256) NOT NULL,
-    userPassword    VARCHAR(512) NOT NULL,
-    unionId         VARCHAR(256) NULL,
-    mpOpenId        VARCHAR(256) NULL,
-    userName        VARCHAR(256) NULL,
-    userAvatar      VARCHAR(1024) NULL,
-    userProfile     VARCHAR(512) NULL,
-    userRole        VARCHAR(256) DEFAULT 'user' NOT NULL,
-    createTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updateTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    isDelete        SMALLINT DEFAULT 0 NOT NULL,
-    CONSTRAINT idx_unionId UNIQUE (unionId)
-);
+    id           bigint auto_increment comment 'id' primary key,
+    userAccount  varchar(256)                           not null comment '账号',
+    userPassword varchar(512)                           not null comment '密码',
+    unionId      varchar(256)                           null comment '微信开放平台id',
+    mpOpenId     varchar(256)                           null comment '公众号openId',
+    userName     varchar(256)                           null comment '用户昵称',
+    userAvatar   varchar(1024)                          null comment '用户头像',
+    userProfile  varchar(512)                           null comment '用户简介',
+    userRole     varchar(256) default 'user'            not null comment '用户角色：user/admin/ban',
+    createTime   datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete     tinyint      default 0                 not null comment '是否删除',
+    index idx_unionId (unionId)
+    ) comment '用户' collate = utf8mb4_unicode_ci;
 
 -- 应用表
-CREATE TABLE IF NOT EXISTS app
+create table if not exists app
 (
-    id              BIGINT PRIMARY KEY,
-    appName         VARCHAR(128) NOT NULL,
-    appDesc         VARCHAR(2048) NULL,
-    appIcon         VARCHAR(1024) NULL,
-    appType         SMALLINT DEFAULT 0 NOT NULL,
-    scoringStrategy SMALLINT DEFAULT 0 NOT NULL,
-    reviewStatus    INT DEFAULT 0 NOT NULL,
-    reviewMessage   VARCHAR(512) NULL,
-    reviewerId      BIGINT NULL,
-    reviewTime      TIMESTAMP NULL,
-    userId          BIGINT NOT NULL,
-    createTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updateTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    isDelete        SMALLINT DEFAULT 0 NOT NULL,
-    CONSTRAINT idx_appName UNIQUE (appName)
-);
+    id              bigint auto_increment comment 'id' primary key,
+    appName         varchar(128)                       not null comment '应用名',
+    appDesc         varchar(2048)                      null comment '应用描述',
+    appIcon         varchar(1024)                      null comment '应用图标',
+    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-测评类）',
+    scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
+    reviewStatus    int      default 0                 not null comment '审核状态：0-待审核, 1-通过, 2-拒绝',
+    reviewMessage   varchar(512)                       null comment '审核信息',
+    reviewerId      bigint                             null comment '审核人 id',
+    reviewTime      datetime                           null comment '审核时间',
+    userId          bigint                             not null comment '创建用户 id',
+    createTime      datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime      datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete        tinyint  default 0                 not null comment '是否删除',
+    index idx_appName (appName)
+    ) comment '应用' collate = utf8mb4_unicode_ci;
 
 -- 题目表
-CREATE TABLE IF NOT EXISTS question
+create table if not exists question
 (
-    id              BIGINT PRIMARY KEY,
-    questionContent TEXT NULL,
-    appId           BIGINT NOT NULL,
-    userId          BIGINT NOT NULL,
-    createTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updateTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    isDelete        SMALLINT DEFAULT 0 NOT NULL,
-    CONSTRAINT idx_appId FOREIGN KEY (appId) REFERENCES app(id)
-);
+    id              bigint auto_increment comment 'id' primary key,
+    questionContent text                               null comment '题目内容（json格式）',
+    appId           bigint                             not null comment '应用 id',
+    userId          bigint                             not null comment '创建用户 id',
+    createTime      datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime      datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete        tinyint  default 0                 not null comment '是否删除',
+    index idx_appId (appId)
+    ) comment '题目' collate = utf8mb4_unicode_ci;
 
 -- 评分结果表
-CREATE TABLE IF NOT EXISTS scoring_result
+create table if not exists scoring_result
 (
-    id               BIGINT PRIMARY KEY,
-    resultName       VARCHAR(128) NOT NULL,
-    resultDesc       TEXT NULL,
-    resultPicture    VARCHAR(1024) NULL,
-    resultProp       VARCHAR(128) NULL,
-    resultScoreRange INT NULL,
-    appId            BIGINT NOT NULL,
-    userId           BIGINT NOT NULL,
-    createTime       TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updateTime       TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    isDelete         SMALLINT DEFAULT 0 NOT NULL,
-    CONSTRAINT idx_appId FOREIGN KEY (appId) REFERENCES app(id)
-);
+    id               bigint auto_increment comment 'id' primary key,
+    resultName       varchar(128)                       not null comment '结果名称，如物流师',
+    resultDesc       text                               null comment '结果描述',
+    resultPicture    varchar(1024)                      null comment '结果图片',
+    resultProp       varchar(128)                       null comment '结果属性集合 JSON，如 [I,S,T,J]',
+    resultScoreRange int                                null comment '结果得分范围，如 80，表示 80及以上的分数命中此结果',
+    appId            bigint                             not null comment '应用 id',
+    userId           bigint                             not null comment '创建用户 id',
+    createTime       datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime       datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete         tinyint  default 0                 not null comment '是否删除',
+    index idx_appId (appId)
+    ) comment '评分结果' collate = utf8mb4_unicode_ci;
 
 -- 用户答题记录表
-CREATE TABLE IF NOT EXISTS user_answer
+create table if not exists user_answer
 (
-    id              BIGINT PRIMARY KEY,
-    appId           BIGINT NOT NULL,
-    appType         SMALLINT DEFAULT 0 NOT NULL,
-    scoringStrategy SMALLINT DEFAULT 0 NOT NULL,
-    choices         TEXT NULL,
-    resultId        BIGINT NULL,
-    resultName      VARCHAR(128) NULL,
-    resultDesc      TEXT NULL,
-    resultPicture   VARCHAR(1024) NULL,
-    resultScore     INT NULL,
-    userId          BIGINT NOT NULL,
-    createTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updateTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    isDelete        SMALLINT DEFAULT 0 NOT NULL,
-    CONSTRAINT idx_appId FOREIGN KEY (appId) REFERENCES app(id),
-    CONSTRAINT idx_userId FOREIGN KEY (userId) REFERENCES "user"(id)
-);
+    id              bigint auto_increment primary key,
+    appId           bigint                             not null comment '应用 id',
+    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-角色测评类）',
+    scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
+    choices         text                               null comment '用户答案（JSON 数组）',
+    resultId        bigint                             null comment '评分结果 id',
+    resultName      varchar(128)                       null comment '结果名称，如物流师',
+    resultDesc      text                               null comment '结果描述',
+    resultPicture   varchar(1024)                      null comment '结果图标',
+    resultScore     int                                null comment '得分',
+    userId          bigint                             not null comment '用户 id',
+    createTime      datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime      datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete        tinyint  default 0                 not null comment '是否删除',
+    index idx_appId (appId),
+    index idx_userId (userId)
+    ) comment '用户答题记录' collate = utf8mb4_unicode_ci;
 
 -- 用户答题记录表（分表 0）
-CREATE TABLE IF NOT EXISTS user_answer_0
+create table if not exists user_answer_0
 (
-    id              BIGINT PRIMARY KEY,
-    appId           BIGINT NOT NULL,
-    appType         SMALLINT DEFAULT 0 NOT NULL,
-    scoringStrategy SMALLINT DEFAULT 0 NOT NULL,
-    choices         TEXT NULL,
-    resultId        BIGINT NULL,
-    resultName      VARCHAR(128) NULL,
-    resultDesc      TEXT NULL,
-    resultPicture   VARCHAR(1024) NULL,
-    resultScore     INT NULL,
-    userId          BIGINT NOT NULL,
-    createTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updateTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    isDelete        SMALLINT DEFAULT 0 NOT NULL,
-    CONSTRAINT idx_appId FOREIGN KEY (appId) REFERENCES app(id),
-    CONSTRAINT idx_userId FOREIGN KEY (userId) REFERENCES "user"(id)
-);
+    id              bigint auto_increment primary key,
+    appId           bigint                             not null comment '应用 id',
+    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-角色测评类）',
+    scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
+    choices         text                               null comment '用户答案（JSON 数组）',
+    resultId        bigint                             null comment '评分结果 id',
+    resultName      varchar(128)                       null comment '结果名称，如物流师',
+    resultDesc      text                               null comment '结果描述',
+    resultPicture   varchar(1024)                      null comment '结果图标',
+    resultScore     int                                null comment '得分',
+    userId          bigint                             not null comment '用户 id',
+    createTime      datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime      datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete        tinyint  default 0                 not null comment '是否删除',
+    index idx_appId (appId),
+    index idx_userId (userId)
+    ) comment '用户答题记录分表 0' collate = utf8mb4_unicode_ci;
 
 -- 用户答题记录表（分表 1）
-CREATE TABLE IF NOT EXISTS user_answer_1
+create table if not exists user_answer_1
 (
-    id              BIGINT PRIMARY KEY,
-    appId           BIGINT NOT NULL,
-    appType         SMALLINT DEFAULT 0 NOT NULL,
-    scoringStrategy SMALLINT DEFAULT 0 NOT NULL,
-    choices         TEXT NULL,
-    resultId        BIGINT NULL,
-    resultName      VARCHAR(128) NULL,
-    resultDesc      TEXT NULL,
-    resultPicture   VARCHAR(1024) NULL,
-    resultScore     INT NULL,
-    userId          BIGINT NOT NULL,
-    createTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updateTime      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    isDelete        SMALLINT DEFAULT 0 NOT NULL,
-    CONSTRAINT idx_appId FOREIGN KEY (appId) REFERENCES app(id),
-    CONSTRAINT idx_userId FOREIGN KEY (userId) REFERENCES "user"(id)
-);
+    id              bigint auto_increment primary key,
+    appId           bigint                             not null comment '应用 id',
+    appType         tinyint  default 0                 not null comment '应用类型（0-得分类，1-角色测评类）',
+    scoringStrategy tinyint  default 0                 not null comment '评分策略（0-自定义，1-AI）',
+    choices         text                               null comment '用户答案（JSON 数组）',
+    resultId        bigint                             null comment '评分结果 id',
+    resultName      varchar(128)                       null comment '结果名称，如物流师',
+    resultDesc      text                               null comment '结果描述',
+    resultPicture   varchar(1024)                      null comment '结果图标',
+    resultScore     int                                null comment '得分',
+    userId          bigint                             not null comment '用户 id',
+    createTime      datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime      datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete        tinyint  default 0                 not null comment '是否删除',
+    index idx_appId (appId),
+    index idx_userId (userId)
+    ) comment '用户答题记录分表 1' collate = utf8mb4_unicode_ci;
