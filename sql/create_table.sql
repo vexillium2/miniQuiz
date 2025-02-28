@@ -3,7 +3,7 @@
 # @from <a href="https://vexillium.icu"></a>
 
 -- 创建库
-create database if not exists mini_quiz;
+create database if not exists miniQuizDB;
 
 -- 切换库
 use mini_quiz;

@@ -1,8 +1,8 @@
 package com.vexillium.miniQuiz.model.vo;
 
-import cn.hutool.json.JSONUtil;
 import com.vexillium.miniQuiz.model.entity.App;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -96,6 +96,7 @@ public class AppVO implements Serializable {
             return null;
         }
         App app = new App();
+        BeanUtils.copyProperties(app, appVO);
         return app;
     }
 
@@ -110,6 +111,7 @@ public class AppVO implements Serializable {
             return null;
         }
         AppVO appVO = new AppVO();
+        BeanUtils.copyProperties(app, appVO);
         return appVO;
     }
 }

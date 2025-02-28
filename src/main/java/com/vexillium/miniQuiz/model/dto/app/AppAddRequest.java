@@ -1,11 +1,8 @@
 package com.vexillium.miniQuiz.model.dto.app;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,21 +13,6 @@ import java.util.List;
  */
 @Data
 public class AppAddRequest implements Serializable {
-
-    /**
-     * 标题
-     */
-    private String title;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
 
     /**
      * 应用名

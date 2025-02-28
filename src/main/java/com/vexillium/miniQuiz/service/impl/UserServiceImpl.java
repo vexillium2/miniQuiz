@@ -1,7 +1,5 @@
 package com.vexillium.miniQuiz.service.impl;
 
-import static com.vexillium.miniQuiz.constant.UserConstant.USER_LOGIN_STATE;
-
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,15 +14,18 @@ import com.vexillium.miniQuiz.model.vo.LoginUserVO;
 import com.vexillium.miniQuiz.model.vo.UserVO;
 import com.vexillium.miniQuiz.service.UserService;
 import com.vexillium.miniQuiz.utils.SqlUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.vexillium.miniQuiz.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户服务实现
@@ -39,7 +40,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 盐值，混淆密码
      */
-    public static final String SALT = "yupi";
+    public static final String SALT = "vexillium";
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {

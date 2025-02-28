@@ -9,32 +9,20 @@ import com.vexillium.miniQuiz.common.ResultUtils;
 import com.vexillium.miniQuiz.constant.UserConstant;
 import com.vexillium.miniQuiz.exception.BusinessException;
 import com.vexillium.miniQuiz.exception.ThrowUtils;
-import com.vexillium.miniQuiz.model.dto.user.UserAddRequest;
-import com.vexillium.miniQuiz.model.dto.user.UserLoginRequest;
-import com.vexillium.miniQuiz.model.dto.user.UserQueryRequest;
-import com.vexillium.miniQuiz.model.dto.user.UserRegisterRequest;
-import com.vexillium.miniQuiz.model.dto.user.UserUpdateMyRequest;
-import com.vexillium.miniQuiz.model.dto.user.UserUpdateRequest;
+import com.vexillium.miniQuiz.model.dto.user.*;
 import com.vexillium.miniQuiz.model.entity.User;
 import com.vexillium.miniQuiz.model.vo.LoginUserVO;
 import com.vexillium.miniQuiz.model.vo.UserVO;
 import com.vexillium.miniQuiz.service.UserService;
-
-import java.util.List;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static com.vexillium.miniQuiz.service.impl.UserServiceImpl.SALT;
 

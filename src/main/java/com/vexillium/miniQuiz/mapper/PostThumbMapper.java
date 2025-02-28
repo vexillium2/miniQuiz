@@ -1,7 +1,7 @@
 package com.vexillium.miniQuiz.mapper;
 
-import com.vexillium.miniQuiz.model.entity.PostThumb;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.vexillium.miniQuiz.model.entity.PostThumb;
 
 /**
  * 帖子点赞数据库操作

@@ -2,6 +2,7 @@ package com.vexillium.miniQuiz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.vexillium.miniQuiz.model.entity.Post;
+
 import java.util.Date;
 import java.util.List;
 

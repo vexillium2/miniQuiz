@@ -1,8 +1,6 @@
 package com.vexillium.miniQuiz.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.vexillium.miniQuiz.model.entity.UserAnswer;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

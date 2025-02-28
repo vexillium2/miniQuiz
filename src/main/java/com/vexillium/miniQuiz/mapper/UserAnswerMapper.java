@@ -1,7 +1,7 @@
 package com.vexillium.miniQuiz.mapper;
 
-import com.vexillium.miniQuiz.model.entity.UserAnswer;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.vexillium.miniQuiz.model.entity.UserAnswer;
 
 /**
 * @author Jacob

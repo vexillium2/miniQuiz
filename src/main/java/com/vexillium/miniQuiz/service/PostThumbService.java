@@ -1,7 +1,7 @@
 package com.vexillium.miniQuiz.service;
 
-import com.vexillium.miniQuiz.model.entity.PostThumb;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.vexillium.miniQuiz.model.entity.PostThumb;
 import com.vexillium.miniQuiz.model.entity.User;
 
 /**

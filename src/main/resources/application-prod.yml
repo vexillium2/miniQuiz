@@ -8,9 +8,9 @@ spring:
   # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/mini_quiz
+    url: jdbc:mysql://localhost:3306/miniquizdb
     username: root
-    password: 123456
+    password: Mysql777
   # Redis 配置
   # todo 需替换配置
   redis:

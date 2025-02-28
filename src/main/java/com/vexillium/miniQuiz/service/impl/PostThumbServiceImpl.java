@@ -10,10 +10,11 @@ import com.vexillium.miniQuiz.model.entity.PostThumb;
 import com.vexillium.miniQuiz.model.entity.User;
 import com.vexillium.miniQuiz.service.PostService;
 import com.vexillium.miniQuiz.service.PostThumbService;
-import javax.annotation.Resource;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 /**
  * 帖子点赞服务实现
