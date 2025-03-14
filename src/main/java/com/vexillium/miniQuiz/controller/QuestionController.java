@@ -10,14 +10,18 @@ import com.vexillium.miniQuiz.common.ResultUtils;
 import com.vexillium.miniQuiz.constant.UserConstant;
 import com.vexillium.miniQuiz.exception.BusinessException;
 import com.vexillium.miniQuiz.exception.ThrowUtils;
+import com.vexillium.miniQuiz.manager.AiManager;
 import com.vexillium.miniQuiz.model.dto.question.*;
+import com.vexillium.miniQuiz.model.entity.App;
 import com.vexillium.miniQuiz.model.entity.Question;
 import com.vexillium.miniQuiz.model.entity.User;
 import com.vexillium.miniQuiz.model.vo.QuestionVO;
+import com.vexillium.miniQuiz.service.AppService;
 import com.vexillium.miniQuiz.service.QuestionService;
 import com.vexillium.miniQuiz.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -40,6 +44,12 @@ public class QuestionController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private AppService appService;
+
+    @Resource
+    private AiManager aiManager;
 
     // region 增删改查
 
@@ -238,5 +248,61 @@ public class QuestionController {
         return ResultUtils.success(true);
     }
 
+    // endregion
+
+    // region AI 生成题目功能
+    private static final String GENERATE_QUESTION_SYSTEM_MESSAGE = "你是严谨出题专家，给你信息：\n" +
+            "```\n" +
+            "应用名称，\n" +
+            "【【【应用描述】】】，\n" +
+            "应用类别，\n" +
+            "要生成的题目数，\n" +
+            "每个题目的选项数\n" +
+            "```\n" +
+            "\n" +
+            "根据上述信息，按照以下步骤出题：\n" +
+            "1.要求：题目和选项尽可能地短，题目不要包含序号，每题的选项数以我提供的为主，题目不能重复\n" +
+            "2.严格按照下面json格式输出题目和选项\n" +
+            "```\n" +
+            "[{\"options\":[{\"value\":\"选项内容\",\"key\":\"A\"},{\"value\":\"\",\"key\":\"B\"}],\"title\":\"题目标题\"}]\n" +
+            "```\n" +
+            "title是题目，options是选项，每个选项的key按照英文字母序（比如 A、B、C、D）以此类推，value是选项内容\n" +
+            "3.题目若包含序号则去除序号\n" +
+            "4.返回的题目列表格式必须为JSON数组";
+
+    private String getGenerateUserQuestionMessage(App app, int questionNumber, int optionNumber) {
+        StringBuilder userMessage = new StringBuilder();
+        userMessage.append(app.getAppName() + '\n');
+        userMessage.append(app.getAppDesc() + '\n');
+        userMessage.append(app.getAppType() + '\n');
+        userMessage.append(questionNumber + '\n');
+        userMessage.append(optionNumber);
+        return userMessage.toString();
+    }
+
+    @PostMapping("/ai_generate")
+    public BaseResponse<List<QuestionContentDTO>> aiGenerateQuestion
+            (@RequestBody AiGenerateQuestionRequest request) {
+        ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
+        // 获取参数
+        Long appId = request.getAppId();
+        int questionNumber = request.getQuestionNumber();
+        ThrowUtils.throwIf(questionNumber <= 0, ErrorCode.PARAMS_ERROR);
+        int optionNumber = request.getOptionNumber();
+        ThrowUtils.throwIf(optionNumber <= 0, ErrorCode.PARAMS_ERROR);
+        // 获取应用信息
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        // 封装Prompt
+        String userMessage = getGenerateUserQuestionMessage(app, questionNumber, optionNumber);
+        // AI 生成问题
+        String result = aiManager.doSyncDefaultRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage);
+        //截取 AI 生成的有用信息
+        int start = result.indexOf("[");
+        int end = result.lastIndexOf("]");
+        String jsonResult = result.substring(start, end + 1);
+        List<QuestionContentDTO> list = JSONUtil.toList(jsonResult, QuestionContentDTO.class);
+        return ResultUtils.success(list);
+    }
     // endregion
 }

@@ -14,13 +14,18 @@ import com.vexillium.miniQuiz.model.dto.userAnswer.UserAnswerAddRequest;
 import com.vexillium.miniQuiz.model.dto.userAnswer.UserAnswerEditRequest;
 import com.vexillium.miniQuiz.model.dto.userAnswer.UserAnswerQueryRequest;
 import com.vexillium.miniQuiz.model.dto.userAnswer.UserAnswerUpdateRequest;
+import com.vexillium.miniQuiz.model.entity.App;
 import com.vexillium.miniQuiz.model.entity.User;
 import com.vexillium.miniQuiz.model.entity.UserAnswer;
+import com.vexillium.miniQuiz.model.enums.ReviewStatusEnum;
 import com.vexillium.miniQuiz.model.vo.UserAnswerVO;
+import com.vexillium.miniQuiz.scoring.ScoringStrategyExecutor;
+import com.vexillium.miniQuiz.service.AppService;
 import com.vexillium.miniQuiz.service.UserAnswerService;
 import com.vexillium.miniQuiz.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -42,7 +47,13 @@ public class UserAnswerController {
     private UserAnswerService userAnswerService;
 
     @Resource
+    private AppService appService;
+
+    @Resource
     private UserService userService;
+
+    @Resource
+    private ScoringStrategyExecutor scoringStrategyExecutor;
 
     // region 增删改查
 
@@ -63,14 +74,35 @@ public class UserAnswerController {
         userAnswer.setChoices(JSONUtil.toJsonStr(choices));
         // 数据校验
         userAnswerService.validUserAnswer(userAnswer, true);
+        // 判断 app 是否存在
+        Long appId = userAnswerAddRequest.getAppId();
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        if (!ReviewStatusEnum.PASS.equals(ReviewStatusEnum.getEnumByValue(app.getReviewStatus()))) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "应用未通过审核，无法答题");
+        }
         // 填充默认值
         User loginUser = userService.getLoginUser(request);
         userAnswer.setUserId(loginUser.getId());
         // 写入数据库
-        boolean result = userAnswerService.save(userAnswer);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        try {
+            boolean result = userAnswerService.save(userAnswer);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        } catch (DuplicateKeyException e) {
+            // ignore error
+        }
         // 返回新写入的数据 id
         long newUserAnswerId = userAnswer.getId();
+        // 调用评分模块
+        try {
+            UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choices, app);
+            userAnswerWithResult.setId(newUserAnswerId);
+            userAnswerWithResult.setAppId(null);
+            userAnswerService.updateById(userAnswerWithResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "评分错误");
+        }
         return ResultUtils.success(newUserAnswerId);
     }
 
