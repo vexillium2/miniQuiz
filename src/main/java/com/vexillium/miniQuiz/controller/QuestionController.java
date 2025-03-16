@@ -15,18 +15,25 @@ import com.vexillium.miniQuiz.model.dto.question.*;
 import com.vexillium.miniQuiz.model.entity.App;
 import com.vexillium.miniQuiz.model.entity.Question;
 import com.vexillium.miniQuiz.model.entity.User;
+import com.vexillium.miniQuiz.model.enums.AppTypeEnum;
 import com.vexillium.miniQuiz.model.vo.QuestionVO;
 import com.vexillium.miniQuiz.service.AppService;
 import com.vexillium.miniQuiz.service.QuestionService;
 import com.vexillium.miniQuiz.service.UserService;
+import com.zhipu.oapi.service.v4.model.ModelData;
+import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 题目接口
@@ -253,30 +260,31 @@ public class QuestionController {
     // region AI 生成题目功能
     private static final String GENERATE_QUESTION_SYSTEM_MESSAGE = "你是严谨出题专家，给你信息：\n" +
             "```\n" +
-            "应用名称，\n" +
-            "【【【应用描述】】】，\n" +
-            "应用类别，\n" +
-            "要生成的题目数，\n" +
-            "每个题目的选项数\n" +
+            "应用名称，  \n" +
+            "【【【应用描述】】】，  \n" +
+            "应用类别，  \n" +
+            "题目数，  \n" +
+            "选项数  \n" +
             "```\n" +
-            "\n" +
             "根据上述信息，按照以下步骤出题：\n" +
-            "1.要求：题目和选项尽可能地短，题目不要包含序号，每题的选项数以我提供的为主，题目不能重复\n" +
-            "2.严格按照下面json格式输出题目和选项\n" +
+            "\n" +
+            "1.要求：题目和选项尽可能地短，题目不要包含序号，每题的选项数以我提供的为主，题目不能重复。\n" +
+            "2.严格按照下面 JSON 格式输出题目和选项：\n" +
             "```\n" +
-            "[{\"options\":[{\"value\":\"选项内容\",\"key\":\"A\"},{\"value\":\"\",\"key\":\"B\"}],\"title\":\"题目标题\"}]\n" +
-            "```\n" +
-            "title是题目，options是选项，每个选项的key按照英文字母序（比如 A、B、C、D）以此类推，value是选项内容\n" +
-            "3.题目若包含序号则去除序号\n" +
-            "4.返回的题目列表格式必须为JSON数组";
+            "[{\"options\":[{\"value\":\"选项内容\",\"key\":\"A\"},{\"value\":\"\",\"key\":\"B\"}],\"title\":\"题目标题\"}] \n" +
+            "``` \n" +
+            "title 是题目，options 是选项，每个选项的 key 按照英文字母序（比如 A、B、C），value 是选项内容。\n" +
+            "3. 严格按照给定题目数量和选项数量生成。";
 
     private String getGenerateUserQuestionMessage(App app, int questionNumber, int optionNumber) {
         StringBuilder userMessage = new StringBuilder();
         userMessage.append(app.getAppName() + '\n');
         userMessage.append(app.getAppDesc() + '\n');
-        userMessage.append(app.getAppType() + '\n');
-        userMessage.append(questionNumber + '\n');
-        userMessage.append(optionNumber);
+        AppTypeEnum appType = AppTypeEnum.getEnumByValue(app.getAppType());
+        userMessage.append(appType.getText() + '\n');
+        userMessage.append(questionNumber + "道题目\n");
+        userMessage.append(optionNumber + "种选项");
+        System.out.printf("getGenerateUserQuestionMessage:%d appType, %d questions, %d options, %s\n",app.getAppType() , questionNumber, optionNumber, userMessage);
         return userMessage.toString();
     }
 
@@ -303,6 +311,62 @@ public class QuestionController {
         String jsonResult = result.substring(start, end + 1);
         List<QuestionContentDTO> list = JSONUtil.toList(jsonResult, QuestionContentDTO.class);
         return ResultUtils.success(list);
+    }
+
+    @GetMapping("/ai_generate/sse")
+    public SseEmitter aiGenerateQuestionSSE(AiGenerateQuestionRequest request) {
+        ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
+        // 获取参数
+        Long appId = request.getAppId();
+        int questionNumber = request.getQuestionNumber();
+        ThrowUtils.throwIf(questionNumber <= 0, ErrorCode.PARAMS_ERROR);
+        int optionNumber = request.getOptionNumber();
+        ThrowUtils.throwIf(optionNumber <= 0, ErrorCode.PARAMS_ERROR);
+        // 获取应用信息
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        // 封装Prompt
+        String userMessage = getGenerateUserQuestionMessage(app, questionNumber, optionNumber);
+        System.out.printf("ATTENTION: %d questions, %d options, %s\n", questionNumber, optionNumber, userMessage);
+        // 建立 SSE 连接对象，0 表示永不超时
+        SseEmitter sseEmitter = new SseEmitter(0L);
+        // AI 生成问题，SSE流式返回
+        Flowable<ModelData> modelDataFlowable = aiManager.doStreamRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
+        // 截取有效括号内内容
+        AtomicInteger counter = new AtomicInteger(0);
+        // 拼接完整字符
+        StringBuilder stringBuilder = new StringBuilder();
+        modelDataFlowable
+                .observeOn(Schedulers.io())
+                .map(modelData -> modelData.getChoices().get(0).getDelta().getContent())
+                .map(message -> message.replaceAll("\\s", ""))
+                .flatMap(message -> {
+                    List<Character> charList = new ArrayList<>();
+                    for(char c : message.toCharArray()) {
+                        charList.add(c);
+                    }
+                    return Flowable.fromIterable(charList);
+                })
+                .doOnNext(character -> {
+                    // 判断左括号
+                    if (character == '{') {
+                        counter.addAndGet(1);
+                    }
+                    if (counter.get() > 0) {
+                        stringBuilder.append(character);
+                    }
+                    if (character == '}') {
+                        counter.addAndGet(-1);
+                        if (counter.get() == 0) {
+                            sseEmitter.send(JSONUtil.toJsonStr(stringBuilder.toString()));
+                            stringBuilder.setLength(0);
+                        }
+                    }
+                })
+                .doOnError((throwable) -> log.error("SSE error", throwable))
+                .doOnComplete(() -> sseEmitter.complete())
+                .subscribe();
+        return sseEmitter;
     }
     // endregion
 }

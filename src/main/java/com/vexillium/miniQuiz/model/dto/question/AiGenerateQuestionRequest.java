@@ -19,19 +19,14 @@ public class AiGenerateQuestionRequest implements Serializable {
     private Long appId;
 
     /**
-     * 题目描述
-     */
-    private String description;
-
-    /**
      * 题目数量
      */
-    private int questionNumber;
+    private int questionNumber = 10;
 
     /**
      * 选项数量
      */
-    private int optionNumber;
+    private int optionNumber = 2;
 
     private static final long serialVersionUID = 1L;
 }

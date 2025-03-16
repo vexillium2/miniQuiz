@@ -4,10 +4,8 @@ import com.vexillium.miniQuiz.common.ErrorCode;
 import com.vexillium.miniQuiz.exception.BusinessException;
 import com.zhipu.oapi.ClientV4;
 import com.zhipu.oapi.Constants;
-import com.zhipu.oapi.service.v4.model.ChatCompletionRequest;
-import com.zhipu.oapi.service.v4.model.ChatMessage;
-import com.zhipu.oapi.service.v4.model.ChatMessageRole;
-import com.zhipu.oapi.service.v4.model.ModelApiResponse;
+import com.zhipu.oapi.service.v4.model.*;
+import io.reactivex.Flowable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -98,7 +96,7 @@ public class AiManager {
     public String doRequest(List<ChatMessage> messages, Boolean stream, Float temperature) {
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
                 .model("glm-4-flash")
-                .stream(Boolean.FALSE)
+                .stream(stream)
                 .temperature(temperature)
                 .invokeMethod(Constants.invokeMethod)
                 .messages(messages)
@@ -111,5 +109,43 @@ public class AiManager {
             e.printStackTrace();
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
         }
+    }
+
+    /**
+     * 通用流式请求
+     * @param messages
+     * @param temperature
+     * @return
+     */
+    public Flowable<ModelData> doStreamRequest(List<ChatMessage> messages, Float temperature) {
+        ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
+                .model("glm-4-flash")
+                .stream(Boolean.TRUE)
+                .temperature(temperature)
+                .invokeMethod(Constants.invokeMethod)
+                .messages(messages)
+                .build();
+        try {
+            ModelApiResponse invokeModelApiResp = clientV4.invokeModelApi(chatCompletionRequest);
+            return invokeModelApiResp.getFlowable();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * 通用流式请求(简化消息传递)
+     * @param temperature
+     * @return
+     */
+    public Flowable<ModelData> doStreamRequest(String systemMessage, String userMessage, Float temperature) {
+        List<ChatMessage> messages = new ArrayList<>();
+        ChatMessage chatMessage = new ChatMessage(ChatMessageRole.SYSTEM.value(), systemMessage);
+        messages.add(chatMessage);
+        chatMessage = new ChatMessage(ChatMessageRole.USER.value(), userMessage);
+        messages.add(chatMessage);
+        return doStreamRequest(messages, temperature);
     }
 }
