@@ -1,5 +1,6 @@
 package com.vexillium.miniQuiz.controller;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vexillium.miniQuiz.annotation.AuthCheck;
@@ -276,4 +277,9 @@ public class UserAnswerController {
     }
 
     // endregion
+    @GetMapping("/generate/id")
+    public BaseResponse<Long> generateUserAnswerId() {
+        return ResultUtils.success(IdUtil.getSnowflakeNextId());
+    }
+
 }

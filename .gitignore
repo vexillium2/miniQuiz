@@ -95,6 +95,10 @@ buildNumber.properties
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
 
+# Configuration files
+!**/src/main/resources/*.yml
+
+
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries

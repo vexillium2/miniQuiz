@@ -327,7 +327,6 @@ public class QuestionController {
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
         // 封装Prompt
         String userMessage = getGenerateUserQuestionMessage(app, questionNumber, optionNumber);
-        System.out.printf("ATTENTION: %d questions, %d options, %s\n", questionNumber, optionNumber, userMessage);
         // 建立 SSE 连接对象，0 表示永不超时
         SseEmitter sseEmitter = new SseEmitter(0L);
         // AI 生成问题，SSE流式返回

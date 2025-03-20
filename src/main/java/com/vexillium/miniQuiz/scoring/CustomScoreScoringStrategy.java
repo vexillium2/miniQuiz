@@ -49,9 +49,10 @@ public class CustomScoreScoringStrategy implements ScoringStrategy {
         List<QuestionContentDTO> questionContent = questionVO.getQuestionContent();
 
         // 遍历题目列表
-        for (QuestionContentDTO questionContentDTO : questionContent) {
+        for (int i = 0; i < questionContent.size(); i ++) {
             // 遍历答案列表
-            for (String answer : choices) {
+            QuestionContentDTO questionContentDTO = questionContent.get(i);
+            String answer = choices.get(i); // 只取当前题目的答案
                 // 遍历题目中的选项
                 for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
                     // 如果答案和选项的key匹配
@@ -60,9 +61,8 @@ public class CustomScoreScoringStrategy implements ScoringStrategy {
                         totalScore += score;
                     }
                 }
-            }
         }
-
+        System.out.printf("ATTENTION: 用户得分: %d\n", totalScore);
         // 3. 遍历得分结果，找到第一个用户分数大于得分范围的结果，作为最终结果
         ScoringResult maxScoringResult = scoringResultList.get(0);
         for (ScoringResult scoringResult : scoringResultList) {
